@@ -1,0 +1,21 @@
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '../app/generated/prisma/client';
+
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
+
+function createPrismaClient() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL environment variable is not set.');
+  }
+  // PrismaPg accepts a connection string, Pool, or PoolConfig directly
+  const adapter = new PrismaPg(connectionString);
+  return new PrismaClient({ adapter });
+}
+
+export const prisma = global.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== 'production') global.prisma = prisma;
